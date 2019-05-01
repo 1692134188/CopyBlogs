@@ -1,0 +1,16 @@
+{% extends 'Home/home_layout.html' %}
+{% block content %}
+    <div class="title-list">
+        {% for row in article_list %}
+        <div class="row-item">
+            <div class="title">
+                <a href="/{{ blog.surfix }}/{{ row.nid }}.html">{{ row.title }}</a>
+            </div>
+            <div class="tips">
+                <span>{{ blog.user.username }}</span>
+                <span>{{ row.create_time|date:"Y-m-d H:i:s" }} </span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}

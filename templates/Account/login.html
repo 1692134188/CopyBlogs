@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/static/css/account.css"/>
+    <script type="text/javascript" src="/static/js/jquery-3.3.1.min.js"></script>
+</head>
+<body>
+<div class="register">
+    <div style="font-size: 25px; font-weight: bold;text-align: center;">
+        用户登录
+    </div>
+    <form action="/login.html" method="post" novalidate>
+        {% csrf_token %}
+        <p>用户名：{{ obj.username }}{{ obj.errors.username.0 }}</p>
+        <p> 密 码 ：{{ obj.pwd }}{{ obj.errors.pwd.0 }}</p>
+        <p> 验证码：{{ obj.checkCode }}{{ obj.errors.checkCode.0 }} <img src="/check_code.html"
+                                                                     onclick="this.src=this.src+'?'"></p>
+        <div class="checkbox">
+            <label>
+                    {{ obj.rbm }} 一个月免登录
+            </label>
+            &nbsp;            &nbsp;
+           <a href="#">忘记密码？</a>
+        </div>
+           <input type="submit" value="登录"/>
+    </form>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $("#id_pwd").attr("type","password")
+    })
+</script>
+</body>
+</html>
