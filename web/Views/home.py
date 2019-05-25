@@ -4,7 +4,9 @@ from django.db.models import Count
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from web.Views.Tools import AaronPager
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt,csrf_protect
 import time
+import json
 def index(request, *args, **kwargs):
     """
     博客首页，展示全部博文
@@ -102,10 +104,13 @@ def filter(request,site,condition,val):
     )
 
 def detail(request, site, nid):
+    cur_page = request.GET.get('p')
     blogInfo=models.BlogInfo.objects.filter(surfix=site).select_related("user").first()
     # 这样关联如果可以的话，那实在是太厉害了
     article=models.Article.objects.filter(blog=blogInfo,nid=nid).select_related("article_detail","classification_id").first();
     comment_list = models.Article_Comment.objects.filter(article=article).select_related("reply")
+    aaron_page = AaronPager.AaronPager(comment_list.count(), cur_page, 5, 7,nid + '.html')
+    comment_list = comment_list[aaron_page.start():aaron_page.end()]
     # tag_list=models.Tag.objects.filter(blog=blog) #标签
     str = ' select a.nid as nid,a.title as title ,count(c.nid) as num  from repository_Tag a INNER JOIN repository_article_tag b on a.nid=b.tag_id_id LEFT JOIN  repository_article c on c.blog_id = a.blog_id and c.nid=b.article_id_id where a.blog_id =%(n1)d  GROUP BY (a.nid)' % {
         "n1": blogInfo.bid}
@@ -118,11 +123,16 @@ def detail(request, site, nid):
         "n1": blogInfo.bid}
     date_list = models.Article.objects.raw(str)
     return render(request, 'Home/home_detail.html',
-        {
-            'blog': blogInfo,
-            'article': article,
-            'comment_list': comment_list,
-            'tag_list': tag_list,
-            'category_list': category_list,
-            'date_list': date_list,
-        })
+                  {
+                      'blog': blogInfo,
+                      'article': article,
+                      'comment_list': comment_list,
+                      'tag_list': tag_list,
+                      'category_list': category_list,
+                      'date_list': date_list,
+                      'aaron_page': aaron_page,
+                  })
+@csrf_exempt
+def PublishComment(request):
+    return render(request, "Aaron/1.html", {"res": "评论成功"})
+

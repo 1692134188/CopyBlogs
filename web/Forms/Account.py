@@ -117,7 +117,10 @@ class LoginForm(BaseForm,forms.Form):
         if userInfo:
             # 记录session，可用于修改headTar中的状态。
             self.request.session['user_info'] = userInfo.values(
-                       'username').first()
+                'uid',
+                'username', 'email',
+                'bloginfo__bid',
+                'bloginfo__surfix').first()
             # 如果勾选了30免登陆，设置session的过期时间
             if self.cleaned_data.get('rbm'):
                 self.request.session.set_expiry(60 * 60 * 24 * 7)

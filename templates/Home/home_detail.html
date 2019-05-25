@@ -2,9 +2,12 @@
 
 {% block css %}
     <link rel="stylesheet" href="/static/plugins/font-awesome-4.7.0/css/font-awesome.min.css"/>
+    <script src="/static/plugins/kindeditor/kindeditor-all.js"></script>
+     <script type="text/javascript" src="/static/js/jquery-3.3.1.min.js"></script>
 {% endblock %}
 
 {% block content %}
+    {% csrf_token %}
     <div class="art-title">
         <a>{{ article.title }}</a>
     </div>
@@ -76,19 +79,14 @@
                 </div>
             </div>
             {% endfor %}
-
         </div>
+
         <div class="comment-list-pager">
-            <ul class="pagination">
-                <li><a href="#">&laquo;</a></li>
-                <li><a href="#">1</a></li>
-                <li><a href="#">2</a></li>
-                <li><a href="#">3</a></li>
-                <li><a href="#">4</a></li>
-                <li><a href="#">5</a></li>
-                <li><a href="#">&raquo;</a></li>
+           <ul class="pagination pagination-sm">
+                {{ aaron_page.page_str|safe }}
             </ul>
         </div>
+
         <div class="comment-area">
             <div class="replay-comment-user"></div>
             <div class="reply-area" style="position: relative;">
@@ -97,19 +95,51 @@
                     您需要登录后才可以回帖 <a href="/login.html">登录</a> | <a href="/register.html">立即注册</a>
                 </div>
                 {% endif %}
-                <textarea name="content" style="width: 100%;height:200px;visibility:hidden;"></textarea>
+                 <textarea name="content" style="width: 100%;height:200px;visibility:hidden;"></textarea>
             </div>
             <div>
                 <div class="reply-btn">
-                    <span><span>21</span>/255字</span>
-                    <a class="btn btn-primary">发表回复</a>
+                    <span><span>25</span>/255字</span>
+                    <a class="btn btn-primary" onclick="PublishComment()">发表回复</a>
                 </div>
             </div>
         </div>
     </div>
 {% endblock %}
 
-
 {% block js %}
+        <script type="text/javascript" src="/static/js/jquery-3.3.1.min.js"></script>
+        <script>
+    var editor;
+    KindEditor.ready(function (K) {
+        editor = K.create('textarea[name="content"]', {
+            resizeType: 1,
+            allowPreviewEmoticons: false,
+            allowImageUpload: false,
+            items: [
+                'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline',
+                'removeformat', '|', 'justifyleft', 'justifycenter', 'justifyright', 'insertorderedlist',
+                'insertunorderedlist', '|', 'emoticons', 'image', 'link']
+        });
+    });
 
+    function PublishComment(){
+        var st = "123";
+         $.ajaxSetup({
+            data: {csrfmiddlewaretoken: '{{ csrf_token }}'},
+        });
+        $.ajax({
+            url: 'PublishComment.html',
+            type: 'POST',
+            dataType: 'json',
+            data: {"ajaxTest": st},
+            success: function (arg) {
+                alert(arg)
+            }
+        })
+    }
+
+
+
+</script>
 {% endblock %}

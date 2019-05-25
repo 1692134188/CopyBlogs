@@ -10,7 +10,7 @@
 # 2               end     当前页列表显示的结束值
 # 3           page_count  总页数
 # 4           page_par_range  页码条显示范围
-
+from django.utils.safestring import mark_safe
 class AaronPager(object):
     def __init__(self, data_count, current_page_num, page_rows=10, page_num_size=7,base_url='/'):
         # 数据总个数
@@ -83,3 +83,54 @@ class AaronPager(object):
 
         return ''.join(page_list)
 
+    def page_str2(self, base_url):
+        page_list = []
+
+        if self.total_count < self.pager_num:
+            start_index = 1
+            end_index = self.total_count + 1
+        else:
+            if self.current_page <= (self.pager_num + 1) / 2:
+                start_index = 1
+                end_index = self.pager_num + 1
+            else:
+                start_index = self.current_page - (self.pager_num - 1) / 2
+                end_index = self.current_page + (self.pager_num + 1) / 2
+                if (self.current_page + (self.pager_num - 1) / 2) > self.total_count:
+                    end_index = self.total_count + 1
+                    start_index = self.total_count - self.pager_num + 1
+
+        if self.current_page == 1:
+            prev = '<li><a class="page" href="javascript:void(0);">上一页</a></li>'
+        else:
+            prev = '<li><a class="page" href="%s?p=%s">上一页</a></li>' % (base_url, self.current_page - 1,)
+        page_list.append(prev)
+
+        for i in range(int(start_index), int(end_index)):
+            if i == self.current_page:
+                temp = '<li class="active"><a class="page active" href="%s?p=%s">%s</a></li>' % (base_url, i, i)
+            else:
+                temp = '<li><a class="page" href="%s?p=%s">%s</a></li>' % (base_url, i, i)
+            page_list.append(temp)
+
+        if self.current_page == self.total_count:
+            nex = '<li><a class="page" href="javascript:void(0);">下一页</a></li>'
+        else:
+            nex = '<li><a class="page" href="%s?p=%s">下一页</a></li>' % (base_url, self.current_page + 1,)
+        page_list.append(nex)
+
+        # jump = """
+        # <input type='text'  /><a onclick='jumpTo(this, "%s?p=");'>GO</a>
+        # <script>
+        #     function jumpTo(ths,base){
+        #         var val = ths.previousSibling.value;
+        #         location.href = base + val;
+        #     }
+        # </script>
+        # """ % (base_url,)
+        #
+        # page_list.append(jump)
+
+        page_str = mark_safe("".join(page_list))
+
+        return page_str
