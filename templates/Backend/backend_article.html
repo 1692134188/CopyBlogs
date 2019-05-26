@@ -21,7 +21,8 @@
     <div>
 
         <div style="border: 1px dashed #dddddd;padding: 8px;border-left: 3px solid #337ab7;">
-            <i class="fa fa-search" aria-hidden="true"></i> 搜索条件
+            <input type="text" id="keyWord" name="keyWord" value="{{ keyWord }}" >
+            <i class="fa fa-search" aria-hidden="true"  onclick="search()"></i> 搜索条件
         </div>
         <div style="padding: 10px">
             <div class="conditions row clearfix" style="margin: 0;padding: 8px 0;">
@@ -64,7 +65,7 @@
                 <tr nid="{{ row.nid }}">
                     <td><a href="/{{ row.blog.site }}/{{ row.nid }}.html">{{ row.title }}</a></td>
                     <td>
-                        <a class="btn btn-danger btn-xs">
+                        <a class="btn btn-danger btn-xs" onClick="return confirm('确定删除?');" href="/backend/del-article-{{ row.nid }}.html">
                             <i class="fa fa-times" aria-hidden="true"></i>
                             删除
                         </a>
@@ -90,5 +91,15 @@
 {% endblock %}
 
 {% block js %}
+    <script>
+        function search(){
+            //1：拿到url
+            var url =window.location.href;
+             //2: 判断是否有?
+             url=url.substring(0,url.indexOf("?"))
+             url =url+"?keyWord="+$("#keyWord").val();
+            javascript:window.location.href=url;
+        }
 
+    </script>
 {% endblock %}

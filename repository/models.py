@@ -9,6 +9,7 @@ class UserInfo(models.Model):
     pwd = models.CharField(verbose_name='密码', max_length=64)
     email = models.EmailField(verbose_name='邮箱', unique=True)
     img = models.ImageField(verbose_name='头像', null=True)
+    status=models.IntegerField(verbose_name='状态',default=1,null=False)
 
 
 class BlogInfo(models.Model):
@@ -19,7 +20,7 @@ class BlogInfo(models.Model):
     title = models.CharField(verbose_name='博客标题', max_length=1000)
     summary = models.CharField(verbose_name='博客简介', max_length=1000)
     user = models.OneToOneField(to="UserInfo", to_field="uid", on_delete=models.CASCADE, null=True)
-
+    status = models.IntegerField(verbose_name='状态', default=1, null=False)
 
 class UserFans(models.Model):
     '''互粉表'''
@@ -27,14 +28,14 @@ class UserFans(models.Model):
                                  on_delete=models.CASCADE, null=True)
     fansUser = models.ForeignKey(verbose_name='粉丝', to="UserInfo", to_field="uid", related_name='fansUsers',
                                  on_delete=models.CASCADE, null=True)
-
+    status = models.IntegerField(verbose_name='状态', default=1, null=False)
     class Meta:
         unique_together = [
             ('starUser', 'fansUser'),
         ]
 
 
-class ReportObstacles(models.Model):
+class Trouble(models.Model):
     '''报障单'''
     uuid = models.UUIDField(primary_key=True)
     title = models.CharField(verbose_name="报障标题", max_length=1000)
@@ -43,21 +44,29 @@ class ReportObstacles(models.Model):
                                    on_delete=models.CASCADE, null=True)
     processUser = models.ForeignKey(verbose_name='处理人', to="UserInfo", to_field="uid", related_name="processUsers",
                                     on_delete=models.CASCADE, null=True)
+    processSolution = models.TextField(verbose_name='处理方法',null=True)
     createTime = models.DateTimeField(verbose_name='创建时间', auto_now_add=True)
     processTime = models.DateTimeField(verbose_name='处理时间', auto_now_add=True)
     type_status = [
+        (0, '已删除'),
         (1, '待处理'),
         (2, '处理中'),
         (3, '已处理'),
     ]
-    status = models.IntegerField(choices=type_status, default=None)
+    pj_choices = (
+        (1, '不满意'),
+        (2, '一般'),
+        (3, '很好'),
+    )
+    status = models.IntegerField(choices=type_status, default=1)
+    evaluate = models.IntegerField(choices=pj_choices, null=True, default=2)
 
 
 class Tag(models.Model):
     nid = models.AutoField(primary_key=True)
     title = models.CharField(verbose_name='标签名称', max_length=32)
     blog = models.ForeignKey(verbose_name='所属博客', to='BlogInfo', to_field='bid', on_delete=models.CASCADE, null=True)
-
+    status = models.IntegerField(verbose_name='状态', default=1, null=False)
 
 class Classification(models.Model):
     nid = models.AutoField(primary_key=True)
@@ -89,12 +98,12 @@ class Article(models.Model):
         through='Article_Tag',
         through_fields=('article_id','tag_id')
     )
-
+    status = models.IntegerField(verbose_name='状态', default=1, null=False)
 class Article_Detail(models.Model):
     detail = models.TextField(verbose_name='文章详细', max_length=models.Max)
     article_id = models.OneToOneField(verbose_name='文章id', to='Article', to_field='nid', on_delete=models.CASCADE,
                                       null=True)
-
+    status = models.IntegerField(verbose_name='状态', default=1, null=False)
 
 class Article_Tag(models.Model):
     # 文章标签分类
@@ -104,6 +113,7 @@ class Article_Tag(models.Model):
     class Meta:
         unique_together=[("article_id","tag_id")]
 
+    status = models.IntegerField(verbose_name='状态', default=1, null=False)
 
 class Article_upDown(models.Model):
     # 文章标签分类
@@ -111,7 +121,7 @@ class Article_upDown(models.Model):
                                    null=True)
     user = models.ForeignKey(verbose_name='赞或踩用户', to='UserInfo', to_field='uid',on_delete=models.CASCADE, null=True)
     up = models.BooleanField(verbose_name='是否赞', default=True)
-
+    status = models.IntegerField(verbose_name='状态', default=1, null=False)
     class Meta:
         unique_together = [
             ('article_id', 'user')
@@ -126,3 +136,4 @@ class Article_Comment(models.Model):
     createTime = models.DateTimeField(verbose_name='评论时间', auto_now_add=True)
     reply = models.ForeignKey(verbose_name='回复评论', to='self', related_name='back', on_delete=models.CASCADE, null=True)
     article = models.ForeignKey(verbose_name='评论文章', to='Article', to_field='nid',on_delete=models.CASCADE, null=True)
+    status = models.IntegerField(verbose_name='状态', default=1, null=False)
